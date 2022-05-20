@@ -37,10 +37,17 @@ async function run() {
         const serviceCollection = client.db('doctors_portal').collection('services')
         const bookingCollection = client.db('doctors_portal').collection('bookings')
         const userCollection = client.db('doctors_portal').collection('users')
+        const doctorCollection = client.db('doctors_portal').collection('doctors')
+
+        const verifyAdmin = async (req, res, next) => {
+          const requester = req.decoded.email
+            const requesterAccount = await userCollection.findOne({ email: requester})
+            if(requesterAccount.role === 'admin') {}
+        }
 
         app.get('/service', async (req, res) => {
             const query = {}
-            const cursor = serviceCollection.find(query)
+            const cursor = serviceCollection.find(query).project({name: 1})
             const services = await cursor.toArray()
             res.send(services)
         })
@@ -108,6 +115,12 @@ async function run() {
             }
             const result = await bookingCollection.insertOne(booking)
             res.send({success: true, result})
+        })
+
+        app.post('/doctor', async(req, res) => {
+          const doctor = req.body;
+          const result = await doctorCollection.insertOne(doctor)
+          res.send(result)
         })
     }
     finally{}
