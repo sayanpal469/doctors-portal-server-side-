@@ -4,6 +4,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken');
 const app = express()
 const port = process.env.PORT || 5000
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // middleware
 app.use(cors())
@@ -49,6 +50,18 @@ async function run() {
             }
         }
 
+        app.post('/create-payment-intent', verifyJWT, async(req, res) =>{
+          const service = req.body;
+          const price = service.price;
+          const amount = price*100;
+          const paymentIntent = await stripe.paymentIntents.create({
+            amount : amount,
+            currency: 'usd',
+            payment_method_types:['card']
+          });
+          res.send({clientSecret: paymentIntent.client_secret})
+        });
+
         app.get('/service',  async (req, res) => {
             const query = {}
             const cursor = serviceCollection.find(query)
@@ -69,10 +82,11 @@ async function run() {
             }
           })
 
-          app.get('/booking/:id', verifyJWT, async (req, res) => {
+          app.get('/booking/:id',  async (req, res) => {
             const id = req.params.id
             const query = {_id: ObjectId(id)}
             const booking = await bookingCollection.findOne(query)
+            res.send(booking)
           })
 
         app.get('/user', verifyJWT, async (req, res) => {

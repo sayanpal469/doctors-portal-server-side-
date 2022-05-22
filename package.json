@@ -19,6 +19,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.6.0",
     "nodemon": "^2.0.16",
-    "save": "^2.5.0"
+    "save": "^2.5.0",
+    "stripe": "^9.2.0"
   }
 }
